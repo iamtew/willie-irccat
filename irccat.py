@@ -35,9 +35,24 @@ def netpipe(bot, trigger):
         logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
         logfile.write(str(datetime.now()) + ' message from ' + addr[0] + ': ' + data)
 
-        chan, msg = data.split(' ', 1)
-        if chan in bot.config.core.channels:
-            bot.msg(chan, msg)
+        # First part of the message should be channel/user
+        rcpt, msg = data.split(' ', 1)
+        if ',' in rcpt:
+            rcpts = rcpt.split(',')
+            for target in rcpts:
+                if target in bot.config.core.channels:
+                    bot.msg(target, msg)
+                elif re.search('^@', target):
+                    bot.msg(re.sub('^@', '', target), msg)
+        else:
+            if re.search('^@', rcpt):
+                bot.msg(re.sub('^@', '', rcpt), msg)
+            elif re.search('^#', rcpt):
+                bot.msg(rcpt, msg)
+            else:
+                chanlist = bot.config.channels.split(',', 1)
+                bot.msg(chanlist[0], data)
+
 
         if not data:
             break
