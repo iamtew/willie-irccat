@@ -14,3 +14,13 @@ Send a string to the listening port starting with the channel name, for example:
 echo "#chatroom The time is $(date +'%T')" | ncat -4 localhost 5234
 ```
 
+You can also send to a specific user by prefixing the message with an `@`, like so:
+```
+echo "@iamtew You're the best :)" | ncat -4 localhost 5234
+```
+
+And you can specify multiple targets, like this:
+```
+echo "#chatroom,#otherchannel multi-chat" | ncat -4 localhost 5234
+```
+
