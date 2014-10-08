@@ -1,11 +1,16 @@
+# coding=utf8
+
+import os
 import willie
 import socket
-import thread
 
 HOST = '0.0.0.0'
 PORT = 5234
 
 def setup(bot):
+    """
+    Open listening socket on bot startup
+    """
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((HOST, PORT))
@@ -14,19 +19,28 @@ def setup(bot):
 
 
 def shutdown(bot):
+    """
+    Close socket at bot shutdown
+    """
     sock.close()
 
-@willie.module.commands('netpipe')
-def netpipe(bot, trigger):
-    def pipe():
-        while True:
-            conn, addr = sock.accept()
-            data = conn.recv(1024)
-            print 'From: ' + addr[0] + ':' + str(addr[1])
-            print ' Msg: ' + data
-            bot.say(data)
-            if not data:
-                break
-            conn.close()
 
-    thread.start_new_thread(pipe, ())
+@willie.module.event('001', '251')
+@willie.module.rule('.*')
+def netpipe(bot, trigger):
+    while True:
+        conn, addr = sock.accept()
+        data = conn.recv(1024)
+
+        pipelog = open(os.path.join(bot.config.logdir, 'netpipe.log'), 'a')
+        pipelog.write('message from ' + addr[0] + ': ' + data)
+
+        chan, msg = data.split(' ', 1)
+        if chan in bot.config.core.channels:
+            bot.msg(chan, msg)
+
+        if not data:
+            break
+
+        conn.close()
+        pipelog.close()
