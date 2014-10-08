@@ -9,3 +9,8 @@ Usage:
 1. Clone repository: `git clone https://github.com/iamtew/willie-irccat ~/.willie/irccat`
 2. Add to your Willie config: `extra = /home/yourname/.willie/irccat`
 
+Send a string to the listening port starting with the channel name, for example:
+```
+echo "#chatroom The time is $(date +'%T')" | ncat -4 localhost 5234
+```
+
