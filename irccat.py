@@ -1,8 +1,10 @@
 # coding=utf8
 
 import os
+import re
 import willie
 import socket
+from datetime import datetime
 
 HOST = '0.0.0.0'
 PORT = 5234
@@ -15,7 +17,6 @@ def setup(bot):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((HOST, PORT))
     sock.listen(5)
-    # sock.setblocking(0)
 
 
 def shutdown(bot):
@@ -31,9 +32,8 @@ def netpipe(bot, trigger):
     while True:
         conn, addr = sock.accept()
         data = conn.recv(1024)
-
-        pipelog = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
-        pipelog.write('message from ' + addr[0] + ': ' + data)
+        logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
+        logfile.write(str(datetime.now()) + ' message from ' + addr[0] + ': ' + data)
 
         chan, msg = data.split(' ', 1)
         if chan in bot.config.core.channels:
@@ -43,4 +43,4 @@ def netpipe(bot, trigger):
             break
 
         conn.close()
-        pipelog.close()
+        logfile.close()
