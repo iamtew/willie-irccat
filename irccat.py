@@ -25,14 +25,14 @@ def shutdown(bot):
     sock.close()
 
 
-@willie.module.event('001', '251')
+@willie.module.event('001')
 @willie.module.rule('.*')
 def netpipe(bot, trigger):
     while True:
         conn, addr = sock.accept()
         data = conn.recv(1024)
 
-        pipelog = open(os.path.join(bot.config.logdir, 'netpipe.log'), 'a')
+        pipelog = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
         pipelog.write('message from ' + addr[0] + ': ' + data)
 
         chan, msg = data.split(' ', 1)
