@@ -1,4 +1,11 @@
 # coding=utf8
+"""
+irccat.py - Network socket listener
+Copyright (c) 2014 Mikael Sörlin <iamtew@asylunatic.se>
+Licensed under the MIT License.
+
+https://github.com/iamtew/willie-irccat
+"""
 
 import os
 import re
