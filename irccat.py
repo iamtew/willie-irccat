@@ -16,11 +16,26 @@ from willie import module
 
 
 def irccat_config(bot):
+    """Return our configuration or False"""
     if not bot.config.has_option('irccat', 'address') or \
        not bot.config.has_option('irccat', 'port'):
         return False
     else:
         return [bot.config.irccat.address, bot.config.irccat.port]
+
+
+def irccat_logger(bot, src, body, level=False):
+    """
+    Write messages to our log with timestamp and source IP.
+    Also write to debug log if we set a level
+    """
+    message = str(datetime.now()) + ': From: ' + src + ':' + body
+    logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
+    logfile.write(message)
+    logfile.close()
+
+    if level is not False:
+        bot.debug('irccat', message, level)
 
 
 def irccat_targets(bot, targets):
@@ -80,20 +95,17 @@ def netpipe(bot, trigger):
         data = conn.recv(1024)
 
         if not len(data.split()) >= 2:
-            errmsg = str(datetime.now()) + ': from: ' + addr[0]
-            errmsg += ': Warning: Received message too short: ' + data
-            bot.debug('irccat', errmsg, 'warning')
+            errmsg = 'Too short message received'
+            irccat_logger(bot, addr[0], errmsg + ': ' + data, 'warning')
             conn.close()
             continue
 
-        logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
-        logfile.write(str(datetime.now()) + ' msg ' + addr[0] + ': ' + data)
+        irccat_logger(bot, addr[0], 'Received: ' + data)
 
         target, message = data.split(' ', 1)
         for chat in irccat_targets(bot, target):
             bot.msg(chat, message)
 
         conn.close()
-        logfile.close()
 
     sock.close()
