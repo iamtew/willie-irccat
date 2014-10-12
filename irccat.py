@@ -56,8 +56,12 @@ def netpipe(bot, trigger):
         conn, addr = sock.accept()
         data = conn.recv(1024)
 
-        if not data.rstrip('\r\n'):
-            break
+        if not len(data.split()) >= 2:
+            errmsg = str(datetime.now()) + ': from: ' + addr[0]
+            errmsg += ': Warning: Received message too short: ' + data
+            bot.debug('irccat', errmsg, 'warning')
+            conn.close()
+            continue
 
         logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
         logfile.write(str(datetime.now()) + ' msg ' + addr[0] + ': ' + data)
