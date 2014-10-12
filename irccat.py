@@ -29,7 +29,7 @@ def irccat_logger(bot, src, body, level=False):
     Write messages to our log with timestamp and source IP.
     Also write to debug log if we set a level
     """
-    message = str(datetime.now()) + ': From: ' + src + ':' + body
+    message = str(datetime.now()) + ': From: ' + src + ': ' + body
     logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
     logfile.write(message)
     logfile.close()
@@ -44,19 +44,17 @@ def irccat_targets(bot, targets):
     easily loop through them when sending messages.
     """
     result = []
-    if ',' in targets:
-        for s in targets.split(','):
-            if re.search('^@', s):
-                result.append(re.sub('^@', '', s))
 
-            elif re.search('^#', s) and s in bot.config.core.channels:
-                result.append(s)
-    else:
-        if re.search('^@', targets):
-            result.append(re.sub('^@', '', targets))
+    for s in targets.split(','):
+        if re.search('^@', s):
+            result.append(re.sub('^@', '', s))
 
-        elif re.search('^#', targets):
-            result.append(targets)
+        elif re.search('^#', s) and s in bot.config.core.channels:
+            result.append(s)
+
+        elif re.search('^#\*$', s):
+            for c in bot.config.core.channels:
+                result.append(c)
 
     return result
 

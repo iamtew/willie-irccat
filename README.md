@@ -24,3 +24,6 @@ And you can specify multiple targets, like this:
 echo "#chatroom,#otherchannel multi-chat" | ncat -4 localhost 5234
 ```
 
+Broadcast to all channels the bot is configured to join by specifying `#*`:
+```
+echo "#* broadcast" | ncat -4 localhost 5234
