@@ -16,6 +16,7 @@ from datetime import datetime
 HOST = '0.0.0.0'
 PORT = 5234
 
+
 @willie.module.event('001')
 @willie.module.rule('.*')
 def netpipe(bot, trigger):
@@ -31,6 +32,10 @@ def netpipe(bot, trigger):
     while True:
         conn, addr = sock.accept()
         data = conn.recv(1024)
+
+        if not data.rstrip('\r\n'):
+            break
+
         logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
         logfile.write(str(datetime.now()) + ' msg ' + addr[0] + ': ' + data)
 
@@ -51,9 +56,6 @@ def netpipe(bot, trigger):
             else:
                 chanlist = bot.config.channels.split(',', 1)
                 bot.msg(chanlist[0], data)
-
-        if not data:
-            break
 
         conn.close()
         logfile.close()
