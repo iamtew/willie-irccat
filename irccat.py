@@ -23,6 +23,29 @@ def irccat_config(bot):
         return [bot.config.irccat.address, bot.config.irccat.port]
 
 
+def irccat_targets(bot, targets):
+    """
+    Go through our potential targets and place them in an array so we can
+    easily loop through them when sending messages.
+    """
+    result = []
+    if ',' in targets:
+        for s in targets.split(','):
+            if re.search('^@', s):
+                result.append(re.sub('^@', '', s))
+
+            elif re.search('^#', s) and s in bot.config.core.channels:
+                result.append(s)
+    else:
+        if re.search('^@', targets):
+            result.append(re.sub('^@', '', targets))
+
+        elif re.search('^#', targets):
+            result.append(targets)
+
+    return result
+
+
 def configure(config):
     """
     | [irccat] | example | purpose        |
@@ -66,23 +89,9 @@ def netpipe(bot, trigger):
         logfile = open(os.path.join(bot.config.logdir, 'irccat.log'), 'a')
         logfile.write(str(datetime.now()) + ' msg ' + addr[0] + ': ' + data)
 
-        # First part of the message should be channel/user
-        rcpt, msg = data.split(' ', 1)
-        if ',' in rcpt:
-            rcpts = rcpt.split(',')
-            for target in rcpts:
-                if target in bot.config.core.channels:
-                    bot.msg(target, msg)
-                elif re.search('^@', target):
-                    bot.msg(re.sub('^@', '', target), msg)
-        else:
-            if re.search('^@', rcpt):
-                bot.msg(re.sub('^@', '', rcpt), msg)
-            elif re.search('^#', rcpt):
-                bot.msg(rcpt, msg)
-            else:
-                chanlist = bot.config.channels.split(',', 1)
-                bot.msg(chanlist[0], data)
+        target, message = data.split(' ', 1)
+        for chat in irccat_targets(bot, target):
+            bot.msg(chat, message)
 
         conn.close()
         logfile.close()
